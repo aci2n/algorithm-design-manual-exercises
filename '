@@ -1,0 +1,106 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <assert.h>
+
+typedef struct tree tree;
+struct tree {
+  int val;
+  tree* parent;
+  tree* left;
+  tree* right;
+};
+
+void tree_add(tree** t, int val, tree* parent) {
+  if (!*t) {
+    *t = malloc(sizeof(tree));
+    **t = (tree) {
+      .val = val,
+      .parent = parent,
+    };
+    return;
+  }
+
+
+  if (val < (*t)->val) {
+    tree_add(&((*t)->left), val, *t);
+  } else if (val > (*t)->val) {
+    tree_add(&((*t)->right), val, *t);
+  }
+}
+
+tree* tree_search(tree* t, int val) {
+  if (!t) {
+    return 0;
+  }
+  if (val < t->val) {
+    return tree_search(t->left, val);
+  }
+  if (val > t->val) {
+    return tree_search(t->right, val);
+  }
+  return t;
+}
+
+void tree_delete(tree** t, int val) {
+  if (!*t) {
+    return;
+  }
+
+  tree* p = *t;
+
+  if (val < p->val) {
+    tree_delete(&p->left, val);
+  }
+
+  tree* l = p->left;
+  tree* r = p->right;
+
+  if (!l && !r) {
+    *t = 0;
+    free(p);
+    return;
+  }
+
+  if (r->left) {
+    l->right = p->right;
+    l->parent = p->parent;
+    *t = l;
+    free(p);
+    return;
+  }
+}
+
+typedef void tree_op(int val);
+
+void tree_visit(tree* t, tree_op* op) {
+  if (t) {
+    tree_visit(t->left, op);
+    op(t->val);
+    tree_visit(t->right, op);
+  }
+}
+
+void print_val(int val) {
+  printf("%d ", val);
+}
+
+int main() {
+  int const n = 20;
+  srand(time(0));
+
+  tree* t = {0};
+  int last = 0;
+
+  for (size_t i = 0; i < n; i++) {
+    last = rand() % n;
+    tree_add(&t, last, 0);
+  }
+
+  assert(tree_search(t, last)->val == last);
+
+  tree_visit(t, print_val);
+  printf("\n");
+
+  return EXIT_SUCCESS;
+}
