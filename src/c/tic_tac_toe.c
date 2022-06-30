@@ -54,6 +54,22 @@ bool ttt_winner(size_t ttt_size, size_t moves_size, size_t moves[moves_size][2])
 
     // the last move will be a winner if it gets any row/col/diag counter to 0
     winner = false;
+
+    int t = 5;
+
+    assert(i++ == 5);
+    assert(i == 6);
+
+    assert(i-- == 6);
+    assert(i == 5);
+
+    assert(++i == 6);
+    assert(i == 6);
+
+    assert(--i == 5);
+    assert(i == 5);
+
+    winner = winner | (--s->rows[x] == 0);
     winner |= !--s->rows[x];
     winner |= !--s->cols[y];
     if (x == y) winner |= !--s->diaglr;
