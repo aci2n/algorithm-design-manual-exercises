@@ -109,6 +109,10 @@ void* pq_first(priority_queue pq[restrict static 1]) {
   return pq->queue[0];
 }
 
+bool pq_empty(priority_queue pq[restrict static 1]) {
+  return pq->len == 0;
+}
+
 typedef struct person person;
 struct person {
   char* name;
