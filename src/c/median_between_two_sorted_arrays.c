@@ -74,7 +74,7 @@ void test(size_t a_len, int a[static a_len], size_t b_len, int b[static b_len], 
 int main(int const argc, char const*const argv[static argc + 1]) {
   srand(time(0));
 
-#define ARR(...) __VA_ARGS__
+#define ARR(...) { __VA_ARGS__ }
 #define TEST(A, B, EXPECTED) \
   do { \
     int a[] = A; \
@@ -84,10 +84,10 @@ int main(int const argc, char const*const argv[static argc + 1]) {
     test(a_len, a, b_len, b, +(EXPECTED)); \
   } while (false); \
 
-  TEST(ARR({1, 3}), ARR({2}), 2.0);
-  TEST(ARR({1, 2}), ARR({3, 4}), 2.5);
-  TEST(ARR({}), ARR({}), 0);
-  TEST(ARR({}), ARR({1}), 1);
+  TEST(ARR(1, 3), ARR(2), 2.0);
+  TEST(ARR(1, 2), ARR(3, 4), 2.5);
+  TEST(ARR(), ARR(), 0);
+  TEST(ARR(), ARR(1), 1);
 
   return EXIT_SUCCESS;
 }
