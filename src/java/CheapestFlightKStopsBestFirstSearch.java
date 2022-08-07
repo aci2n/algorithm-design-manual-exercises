@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class CheapestFlightKStops {
+public class CheapestFlightKStopsBestFirstSearch {
     class Edge {
         final int v;
         final int weight;
@@ -45,36 +45,16 @@ public class CheapestFlightKStops {
     }
 
     class Solution {
-        private int findCheapestPrice(Graph graph, int src, int dst, int hopsAvailable, int price, boolean[] discovered, int[] minHops, int cheapestPrice) {
-            if (src == dst) {
-                return price;
-            }
-
-            if (discovered[src] || minHops[src] > hopsAvailable || price >= cheapestPrice) {
-                return Integer.MAX_VALUE;
-            }
-
-            discovered[src] = true;
-            for (Edge edge : graph.adjacencyLists.get(src)) {
-                cheapestPrice = Math.min(
-                        cheapestPrice,
-                        findCheapestPrice(graph, edge.v, dst, hopsAvailable - 1, price + edge.weight, discovered, minHops, cheapestPrice));
-            }
-            discovered[src] = false;
-
-            return cheapestPrice;
-        }
-
-        private int[] getMinHops(Graph graph, int s) {
-            int[] minHops = new int[graph.vertices()];
+        private int[] getMinPathSize(Graph graph, int s) {
+            int[] minPathSize = new int[graph.vertices()];
             Queue<Integer> queue = new LinkedList<>();
             boolean[] discovered = new boolean[graph.vertices()];
 
-            Arrays.fill(minHops, Integer.MAX_VALUE);
+            Arrays.fill(minPathSize, Integer.MAX_VALUE);
 
             queue.add(s);
             discovered[s] = true;
-            minHops[s] = 0;
+            minPathSize[s] = 1;
 
             while (!queue.isEmpty()) {
                 int v = queue.remove();
@@ -82,19 +62,54 @@ public class CheapestFlightKStops {
                 for (Edge edge : graph.adjacencyLists.get(v)) {
                     if (!discovered[edge.v]) {
                         discovered[edge.v] = true;
-                        minHops[edge.v] = minHops[v] + 1;
+                        minPathSize[edge.v] = minPathSize[v] + 1;
                         queue.add(edge.v);
                     }
                 }
             }
 
-            return minHops;
+            return minPathSize;
         }
 
         public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
-            int[] minHops = getMinHops(new Graph(n, flights, true), dst);
-            int cheapestPrice = findCheapestPrice(new Graph(n, flights, false), src, dst, k + 1, 0, new boolean[n], minHops, Integer.MAX_VALUE);
+            int[] minPathSize = getMinPathSize(new Graph(n, flights, true), dst);
+            Graph g = new Graph(n, flights, false);
+            Queue<State> queue = new PriorityQueue<>(Comparator.comparingInt(res -> res.price));
+            int cheapestPrice = Integer.MAX_VALUE;
+            int maxPathSize = k + 2;
+
+            queue.add(new State(0, new TreeSet<>(List.of(src))));
+
+            while (!queue.isEmpty() && queue.peek().price < cheapestPrice) {
+                State curr = queue.remove();
+                SortedSet<Integer> currPath = curr.path;
+                int currVertex = currPath.last();
+
+                for (Edge edge : g.adjacencyLists.get(currVertex)) {
+                    int nextVertex = edge.v;
+                    int nextPrice = curr.price + edge.weight;
+
+                    if (nextVertex == dst) {
+                        cheapestPrice = Math.min(cheapestPrice, nextPrice);
+                    } else if (!currPath.contains(nextVertex) && nextPrice < cheapestPrice && currPath.size() + minPathSize[nextVertex] <= maxPathSize) {
+                        SortedSet<Integer> nextPath = new TreeSet<>(currPath);
+                        nextPath.add(nextVertex);
+                        queue.add(new State(nextPrice, nextPath));
+                    }
+                }
+            }
+
             return cheapestPrice == Integer.MAX_VALUE ? -1 : cheapestPrice;
+        }
+    }
+
+    class State {
+        final int price;
+        final SortedSet<Integer> path;
+
+        State(int price, SortedSet<Integer> path) {
+            this.price = price;
+            this.path = path;
         }
     }
 }
