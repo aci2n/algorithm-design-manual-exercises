@@ -5,29 +5,29 @@ class RemoveInvalidParentheses {
     class Candidate {
         final String s;
         final int ub;
-        final boolean balanced;
 
         Candidate(String s) {
-            boolean balanced = true;
-            int balance = 0;
+            int unmatchedOpening = 0;
+            int unmatchedClosing = 0;
 
             for (int i = 0; i < s.length(); i++) {
                 char c = s.charAt(i);
                 switch (c) {
                     case '(':
-                        balance++;
+                        unmatchedOpening++;
                         break;
                     case ')':
-                        if (--balance < 0) {
-                            balanced = false;
+                        if (unmatchedOpening == 0) {
+                            unmatchedClosing++;
+                        } else {
+                            unmatchedOpening--;
                         }
                         break;
                 }
             }
 
             this.s = s;
-            this.ub = s.length() - Math.abs(balance);
-            this.balanced = balanced && balance == 0;
+            this.ub = s.length() - unmatchedOpening - unmatchedClosing;
         }
     }
 
@@ -43,7 +43,7 @@ class RemoveInvalidParentheses {
             while (!queue.isEmpty() && queue.peek().ub >= maxLength) {
                 Candidate curr = queue.remove();
 
-                if (curr.balanced) {
+                if (curr.s.length() == curr.ub) {
                     if (curr.s.length() > maxLength) {
                         maxLength = curr.s.length();
                         solutions = new ArrayList<>();
@@ -53,6 +53,8 @@ class RemoveInvalidParentheses {
                 }
 
                 for (int i = 0; i < curr.s.length(); i++) {
+                    char c = curr.s.charAt(i);
+                    if (c != '(' && c != ')') continue;
                     String next = curr.s.substring(0, i) + curr.s.substring(i + 1);
                     if (!known.contains(next)) {
                         known.add(next);
