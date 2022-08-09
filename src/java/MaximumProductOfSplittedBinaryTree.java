@@ -1,7 +1,4 @@
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 public class MaximumProductOfSplittedBinaryTree {
     public static class TreeNode {
@@ -43,20 +40,6 @@ public class MaximumProductOfSplittedBinaryTree {
         }
     }
 
-    class Pair {
-        final long x;
-        final long y;
-
-        Pair(long x, long y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        long product() {
-            return x * y;
-        }
-    }
-
     class Solution {
         private TreeNodeWithSum buildTreeWithSums(TreeNode root) {
             if (root == null) {
@@ -84,7 +67,7 @@ public class MaximumProductOfSplittedBinaryTree {
 
             if (root.left != null) {
                 long sumRightSide = parentSum + root.sum - root.left.sum;
-                result = Math.max(result, Math.max(sumRightSide * root.left.sum, findHighetProduct(root.left, sumRightSide)));
+                result = Math.max(result, Math.max(sumRightSide * root.left.sum, findHighestProduct(root.left, sumRightSide)));
             }
 
             return result;
